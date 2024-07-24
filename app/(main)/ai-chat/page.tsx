@@ -14,7 +14,7 @@ function AiChat() {
       <div className="border bg-muted/40 rounded-md h-full flex ">
         <div className="flex-1 p-2 max-w-[50%] overflow-hidden">
           <div className="bg-white h-full flex justify-center items-center font-semibold border rounded-md">
-            <PdfViewer />
+            {/* <PdfViewer /> */}
             {/* PDF */}
           </div>
         </div>

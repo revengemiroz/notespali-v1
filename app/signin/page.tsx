@@ -17,7 +17,7 @@ function SignIn() {
             </h1>
 
             <h3 className="text-xs text-gray-500 w-full flex flex-row items-center justify-center">
-              <p>Don't have an account ?</p>&nbsp;
+              <p>Don&apos;t have an account ?</p>&nbsp;
               <Link href={'/register'} className="text-blue-700 font-semibold">
                 Register
               </Link>

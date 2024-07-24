@@ -42,8 +42,8 @@ function LeftChatComponent() {
     <div className="flex justify-start">
       <div className="max-w-[65%] space-y-2">
         <div className="rounded-lg bg-black text-white p-3 text-sm">
-          Hey, how's it going? I wanted to follow up on the design changes we
-          discussed earlier.
+          Hey, how&apos;s it going? I wanted to follow up on the design changes
+          we discussed earlier.
         </div>
       </div>
     </div>
@@ -55,8 +55,8 @@ function RightChatComponent() {
     <div className="flex justify-end">
       <div className="max-w-[65%] space-y-2">
         <div className="rounded-lg bg-muted-foreground/10  p-3 text-sm">
-          Hey, how's it going? I wanted to follow up on the design changes we
-          discussed earlier.
+          Hey, how&apos;s it going? I wanted to follow up on the design changes
+          we discussed earlier.
         </div>
       </div>
     </div>

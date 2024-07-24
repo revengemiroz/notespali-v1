@@ -36,8 +36,8 @@ export default function Component({
           <CardHeader className="px-0">
             <CardTitle>Contact Us</CardTitle>
             <CardDescription>
-              Fill out the message below and we'll get back to you as soon as
-              possible.
+              Fill out the message below and we&apos;ll get back to you as soon
+              as possible.
             </CardDescription>
           </CardHeader>
 

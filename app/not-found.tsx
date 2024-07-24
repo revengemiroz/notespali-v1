@@ -12,8 +12,8 @@ function NotFoundPage() {
           Oops, page not found!
         </h1>
         <p className="mt-4 text-muted-foreground">
-          The page you're looking for doesn't exist. Check the URL or go back to
-          the homepage.
+          The page you&apos;re looking for doesn&apos;t exist. Check the URL or
+          go back to the homepage.
         </p>
         <div className="mt-6">
           <Link
