@@ -8,24 +8,24 @@ const prisma = new PrismaClient()
 export const { handlers, signIn, signOut, auth } = NextAuth({
   // adapter: PrismaClient(prisma),
   providers: [
-    Google,
-    Credentials({
-      credentials: {
-        email: {},
-        password: {},
-      },
-      authorize: async (credentials) => {
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials?.email,
-          },
-        })
-        if (user?.password === credentials?.password) {
-          return user
-        } else {
-          return null
-        }
-      },
-    }),
+    // Google,
+    // Credentials({
+    //   credentials: {
+    //     email: {},
+    //     password: {},
+    //   },
+    //   authorize: async (credentials) => {
+    //     const user = await prisma.user.findUnique({
+    //       where: {
+    //         email: credentials?.email,
+    //       },
+    //     })
+    //     if (user?.password === credentials?.password) {
+    //       return user
+    //     } else {
+    //       return null
+    //     }
+    //   },
+    // }),
   ],
 })
