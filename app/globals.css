@@ -78,3 +78,7 @@
 .border-red {
   border: 2px solid red;
 }
+
+.simplebar-content {
+  height: 100%;
+}
