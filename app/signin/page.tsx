@@ -26,10 +26,19 @@ function SignIn() {
 
           <div className="jusify-center flex flex-col items-center gap-4">
             <div className="w-full">
-              <Input placeholder="Email" type="email" />
+              <Input placeholder="Email" type="email" autoFocus />
             </div>
             <div className="w-full">
               <CustomInput placeholder="Password" type="password" />
+            </div>
+
+            <div className="flex justify-end w-full text-xs">
+              <Link
+                href={'/reset-password'}
+                className="text-black-700 font-medium hover:underline"
+              >
+                Forgot password ?
+              </Link>
             </div>
 
             <div className="w-full flex flex-col gap-3">

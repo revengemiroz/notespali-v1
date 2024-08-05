@@ -1,23 +1,26 @@
 'use client'
 
 import React from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useMutation } from '@tanstack/react-query'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { toast } from 'sonner'
+import { z } from 'zod'
+import { CheckIcon, Loader2, X } from 'lucide-react'
 
 import { CustomInput } from '@/components/notespali-ui/Custom-input'
 import { Button } from '@/components/ui/button'
-import { CheckIcon, X } from 'lucide-react'
-import Link from 'next/link'
 import { Input } from '@/components/ui/input'
+import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 
 import { registerFormSchema } from '@/zodSchema'
-import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
-import { useForm } from 'react-hook-form'
 
-import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { toast } from 'sonner'
-import { useMutation } from '@tanstack/react-query'
+import { LoadingSpinner } from '@/components/notespali-ui/OverlaySpinner'
 
 function Register() {
+  const router = useRouter()
   const form = useForm({
     resolver: zodResolver(registerFormSchema),
     defaultValues: {
@@ -28,7 +31,11 @@ function Register() {
     },
   })
 
-  const { mutate: registerUser } = useMutation({
+  const {
+    mutate: registerUser,
+    isPending,
+    isSuccess,
+  } = useMutation({
     mutationKey: ['user-register'],
     // enable manual refetch on error to prevent automatic refetching
     mutationFn: async (data: z.infer<typeof registerFormSchema>) => {
@@ -42,11 +49,12 @@ function Register() {
       const json = await response.json()
       return json
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       console.log({ data })
       if (data.error) {
         toastError(data.message)
       } else {
+        await router.push('/signin')
         toastSuccess(data.message)
         form.reset()
       }
@@ -96,12 +104,17 @@ function Register() {
     }
   }
 
+  // if (isPending || isSuccess) return <LoadingSpinner />
+
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="min-h-screen flex justify-center items-center"
       >
+        {/* show spinner if pending or success */}
+        {isPending || isSuccess ? <LoadingSpinner /> : null}
+
         <div className="flex w-full max-w-[420px] flex-col gap-8  p-8 md:max-w-[420px]">
           <main className="space-y-8">
             <div className="space-y-2">
@@ -203,8 +216,12 @@ function Register() {
               />
 
               <div className="w-full flex flex-col gap-3">
-                <Button type="submit" className="w-full">
-                  Register
+                <Button type="submit" className="w-full" disabled={isPending}>
+                  {isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    'Register'
+                  )}
                 </Button>
               </div>
             </div>

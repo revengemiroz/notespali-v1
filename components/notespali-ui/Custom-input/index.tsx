@@ -21,7 +21,7 @@ export const CustomInput = ({ ...props }) => {
   return (
     <div className=" relative ">
       <Input {...props} type={showPassword ? 'text' : 'password'} />
-      <div className="absolute right-4 top-[50%]    translate-y-[-50%] text-muted-foreground">
+      <div className="absolute right-4 top-[50%] hover:bg-muted-foreground/10 hover:rounded-full hover:p-1 p-1 transition-all translate-y-[-50%] text-muted-foreground">
         <Eye
           onClick={handlePassword}
           className={cn('h-4 w-4 cursor-pointer', !showPassword && 'hidden')}

@@ -38,13 +38,14 @@ model User {
   id            String    @id @default(cuid())
   fullName      String?
   email         String?   @unique
-  emailVerified DateTime?
+  isEmailVerified Boolean   @default(false)
   password      String
   image         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   accounts      Account[]
   sessions      Session[]
+  verificationRequest VerificationRequest?
 }
 
 model VerificationRequest {
@@ -56,4 +57,5 @@ model VerificationRequest {
   updatedAt  DateTime @updatedAt
 
   @@unique([identifier, token])
+  user       User     @relation(fields: [id], references: [id])
 }

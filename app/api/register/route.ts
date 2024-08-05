@@ -1,6 +1,7 @@
 import { db } from '../../../lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 import * as bcrypt from 'bcryptjs'
+import { v4 as uuidv4 } from 'uuid'
 
 export async function POST(req: NextRequest) {
   try {
@@ -59,14 +60,26 @@ export async function POST(req: NextRequest) {
     // hash the password before saving it to the database
     const hashedPassword = await bcrypt.hash(password, 12)
 
+    // generate a verification token for the user
+    const verificationToken = uuidv4()
+
     // create a new user in the database with hashed password
     const user = await db.user.create({
       data: {
         email,
         fullName,
         password: hashedPassword,
+        verificationRequest: {
+          create: {
+            identifier: 'email',
+            token: verificationToken,
+            expires: new Date(Date.now() + 3600000), // 1 hour
+          },
+        },
       },
     })
+
+    const verificationLink = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${verificationToken}`
 
     // remove the user from the database
     return NextResponse.json(
