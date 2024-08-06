@@ -2,6 +2,8 @@ import { db } from '../../../lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 import * as bcrypt from 'bcryptjs'
 import { v4 as uuidv4 } from 'uuid'
+import { sendEmail } from '../send-email/sendEmail'
+import { error } from 'console'
 
 export async function POST(req: NextRequest) {
   try {
@@ -61,31 +63,54 @@ export async function POST(req: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, 12)
 
     // generate a verification token for the user
-    const verificationToken = uuidv4()
+    const uuid = uuidv4()
+    const verificationCode = uuid.replace(/[^a-zA-Z0-9]/g, '').substring(0, 6)
+    const hashCode = await bcrypt.hash(verificationCode, 12) // hash the verificationCode
+
+    //create 6 digit alphanumeric code
 
     // create a new user in the database with hashed password
     const user = await db.user.create({
       data: {
         email,
         fullName,
+        isEmailVerified: false,
         password: hashedPassword,
         verificationRequest: {
           create: {
             identifier: 'email',
-            token: verificationToken,
+            token: hashCode,
             expires: new Date(Date.now() + 3600000), // 1 hour
           },
         },
       },
     })
 
-    const verificationLink = `${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${verificationToken}`
+    if (user) {
+      // send verification email
+      const result = await sendEmail(email, verificationCode)
+
+      if (result && result.data) {
+        return NextResponse.json(
+          {
+            message: 'User created successfully and verification email sent',
+            user,
+            error: false,
+          },
+          { status: 201 }
+        )
+      }
+
+      if (result && result.error) {
+        // log the error in the console for debugging purposes
+        return NextResponse.json(
+          { message: 'Error sending email', error: true },
+          { status: 400 }
+        )
+      }
+    }
 
     // remove the user from the database
-    return NextResponse.json(
-      { message: 'User created successfully', user },
-      { status: 201 }
-    )
   } catch (err) {
     // log the error in the console for debugging purposes
     console.log('[REGISTER ERROR]', err)

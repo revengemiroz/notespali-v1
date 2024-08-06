@@ -15,7 +15,13 @@ const baseUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
   : ''
 
-const VerificationEmail = () => {
+const VerificationEmail = ({
+  verificationCode,
+  email,
+}: {
+  verificationCode: string
+  email: string
+}) => {
   const previewText = 'Verify your email address'
 
   return (
@@ -41,8 +47,11 @@ const VerificationEmail = () => {
           </Section>
 
           <Section style={codeSection}>
-            <Text style={verificationCode}>123456</Text>
-            <Button style={button} href="#">
+            <Text style={verificationCodeStyle}>{verificationCode}</Text>
+            <Button
+              style={button}
+              href={`http://localhost:3000/verify/${email}`}
+            >
               Verify Email
             </Button>
           </Section>
@@ -115,7 +124,7 @@ const codeSection = {
   textAlign: 'center',
 }
 
-const verificationCode = {
+const verificationCodeStyle = {
   fontSize: '60px',
   fontWeight: '800',
   color: '#0f172a',

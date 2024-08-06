@@ -3,86 +3,187 @@
  * @see https://v0.dev/t/VfNAKRAOTQl
  * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
  */
-import { Input } from '@/components/ui/input'
+import { z } from 'zod'
 import {
   InputOTP,
   InputOTPGroup,
-  InputOTPSeparator,
   InputOTPSlot,
 } from '@/components/ui/input-otp'
+import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
 import { REGEXP_ONLY_DIGITS_AND_CHARS } from 'input-otp'
 import { Button } from '@/components/ui/button'
+import { useRouter } from 'next/navigation'
+import { useMutation } from '@tanstack/react-query'
+import { toast } from 'sonner'
+import { Controller, useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 
-function VerifyEmail() {
+const verifySchema = z
+  .object({
+    email: z.string().email({ message: 'Please enter a valid email' }),
+    OTP: z.string().min(6, { message: 'Please enter a valid OTP' }),
+  })
+  .refine((data) => data.OTP.length === 6, {
+    message: 'Please enter a valid OTP',
+    path: ['OTP'],
+  })
+
+function VerifyEmail({ newEmail }: { newEmail: string }) {
+  const router = useRouter()
+
+  const { control, handleSubmit } = useForm({
+    defaultValues: {
+      otp: '',
+    },
+  })
+
+  const { mutate: resendEmail } = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      const json = await response.json()
+      return json
+    },
+    onSuccess: async (data) => {
+      console.log({ data })
+      if (data.error) {
+        toast.error(data.message)
+        return
+      } else {
+        toast.success(data.message)
+      }
+    },
+    onError: () => {
+      toast.error('Email verification failed')
+    },
+  })
+  const { mutate } = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await fetch('/api/verify-email', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      const json = await response.json()
+      return json
+    },
+    onSuccess: async (data) => {
+      console.log({ data })
+      if (data.error) {
+        toast.error(data.message)
+        return
+      } else {
+        toast.success(data.message)
+        router.push('/dashboard')
+      }
+    },
+    onError: () => {
+      toast.error('Email verification failed')
+    },
+  })
+
+  const onResend = () => {
+    resendEmail({ email: newEmail })
+  }
+
+  const onSubmit = async (data: any) => {
+    console.log({ data })
+    const body = {
+      email: newEmail,
+      token: data.otp,
+    }
+
+    try {
+      await mutate(body)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
   return (
-    <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-md space-y-6 text-center">
-        <div className="space-y-2">
-          <MailOpenIcon className="mx-auto h-12 w-12 text-primary" />
-          <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Verify your email
-          </h1>
-          <p className="text-muted-foreground">
-            We've sent a verification code to your email address. Please enter
-            the code below to confirm your identity.
-          </p>
-        </div>
-        <div className="space-y-4">
-          <div className="w-full">
-            <InputOTP
-              className="w-full"
-              maxLength={6}
-              pattern={REGEXP_ONLY_DIGITS_AND_CHARS}
-            >
-              <InputOTPGroup className="w-full">
-                <InputOTPSlot
-                  index={0}
-                  className="w-full h-12 uppercase font-bold"
-                />
-                <InputOTPSlot
-                  index={1}
-                  className="w-full h-12 uppercase font-bold"
-                />
-                <InputOTPSlot
-                  index={2}
-                  className="w-full h-12 uppercase font-bold"
-                />
-                <InputOTPSlot
-                  index={3}
-                  className="w-full h-12 uppercase font-bold"
-                />
-                <InputOTPSlot
-                  index={4}
-                  className="w-full h-12 uppercase font-bold"
-                />
-                <InputOTPSlot
-                  index={5}
-                  className="w-full h-12 uppercase font-bold"
-                />
-              </InputOTPGroup>
-            </InputOTP>
-            {/* {Array.from({ length: 6 }).map((_, i) => (
-              <Input
-                key={i}
-                type="text"
-                maxLength={1}
-                className="h-12 w-full rounded-md border border-input bg-background px-3 text-center text-2xl font-bold focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              />
-            ))} */}
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="flex min-h-[100dvh] flex-col items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-md space-y-6 text-center">
+          <div className="space-y-2">
+            <MailOpenIcon className="mx-auto h-12 w-12 text-primary" />
+            <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+              Verify your email
+            </h1>
+            <p className="text-muted-foreground">
+              We've sent a verification code to your email address. Please enter
+              the code below to confirm your identity.
+            </p>
           </div>
-          <Button className="w-full">Verify</Button>
-          <p className="text-sm text-muted-foreground">
-            Didn&apos;t receive the code?{' '}
-            <button
-              type="button"
-              className="font-medium text-primary hover:underline"
-            >
-              Resend
-            </button>
-          </p>
+          <div className="space-y-4">
+            <div className="w-full">
+              <Controller
+                control={control}
+                name="otp"
+                rules={{ validate: (value) => value.length === 6 }}
+                render={({ field, fieldState }) => (
+                  <InputOTP
+                    {...field}
+                    autoFocus
+                    className="w-full"
+                    maxLength={6}
+                    pattern={REGEXP_ONLY_DIGITS_AND_CHARS}
+                  >
+                    <InputOTPGroup className="w-full">
+                      <InputOTPSlot
+                        index={0}
+                        className="w-full h-12 uppercase font-bold"
+                      />
+                      <InputOTPSlot
+                        index={1}
+                        className="w-full h-12 uppercase font-bold"
+                      />
+                      <InputOTPSlot
+                        index={2}
+                        className="w-full h-12 uppercase font-bold"
+                      />
+                      <InputOTPSlot
+                        index={3}
+                        className="w-full h-12 uppercase font-bold"
+                      />
+                      <InputOTPSlot
+                        index={4}
+                        className="w-full h-12 uppercase font-bold"
+                      />
+                      <InputOTPSlot
+                        index={5}
+                        className="w-full h-12 uppercase font-bold"
+                      />
+                    </InputOTPGroup>
+                  </InputOTP>
+                )}
+              />
+            </div>
+            <Button type="submit" className="w-full">
+              Verify
+            </Button>
+            <p className="text-sm text-muted-foreground">
+              Didn&apos;t receive the code?{' '}
+              <button
+                onClick={() => {
+                  onResend()
+                }}
+                type="button"
+                className="font-medium text-primary hover:underline"
+              >
+                Resend
+              </button>
+            </p>
+          </div>
         </div>
       </div>
-    </div>
+    </form>
   )
 }
 

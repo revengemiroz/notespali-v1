@@ -49,12 +49,12 @@ function Register() {
       const json = await response.json()
       return json
     },
-    onSuccess: async (data) => {
-      console.log({ data })
+    onSuccess: async (data, i) => {
+      console.log({ data }, i)
       if (data.error) {
         toastError(data.message)
       } else {
-        await router.push('/signin')
+        await router.push(`/verify/${data?.user?.email}`)
         toastSuccess(data.message)
         form.reset()
       }
@@ -96,15 +96,12 @@ function Register() {
   }
 
   const onSubmit = async (data: z.infer<typeof registerFormSchema>) => {
-    console.log(data)
     try {
       await registerUser(data)
     } catch (error) {
       console.log({ error })
     }
   }
-
-  // if (isPending || isSuccess) return <LoadingSpinner />
 
   return (
     <Form {...form}>
@@ -113,7 +110,7 @@ function Register() {
         className="min-h-screen flex justify-center items-center"
       >
         {/* show spinner if pending or success */}
-        {isPending || isSuccess ? <LoadingSpinner /> : null}
+        {isPending ? <LoadingSpinner /> : null}
 
         <div className="flex w-full max-w-[420px] flex-col gap-8  p-8 md:max-w-[420px]">
           <main className="space-y-8">
